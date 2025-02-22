@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "tau"
+version = "0.1.0"
+description = "tau agent"
+authors = ["Ryosuke Hayashi"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+grpcio = "*"
+grpcio-tools = "*"
+langchain = "*"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.9.7"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
