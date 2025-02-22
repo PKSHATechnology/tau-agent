@@ -22,7 +22,7 @@ class Agent:
         )
         self._messages = [SystemMessage(content=system_prompt)]
 
-    def send_message(self, message: str):
+    def send_message(self, message: str) -> str:
         self._messages.append(HumanMessage(content=message))
         result = self._agent.invoke({"messages": self._messages})
         self._messages = result["messages"]
