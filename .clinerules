@@ -1,0 +1,9 @@
+# Rules
+- Python is used
+- ruff is used for formatting
+- Comment should be in English
+- Add test cases as much as possible
+- Run the test cases after writing the code
+- Run formatter and linter after writing the code
+- FastAPI is used to provide API
+- Celery with redis is used to run worker
