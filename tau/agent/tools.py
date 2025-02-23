@@ -16,5 +16,7 @@ _tools = {
 }
 
 
-def configure_tool(name: str, args: dict):
+def configure_tool(name: str, args: dict | None):
+    if args is None:
+        args = {}
     return _tools[name](**args)

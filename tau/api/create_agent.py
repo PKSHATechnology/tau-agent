@@ -3,7 +3,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from tau.agent.tools import configure_tool
 from tau.celery import start_agent
 
 router = APIRouter()
@@ -11,7 +10,7 @@ router = APIRouter()
 
 class Tool(BaseModel):
     name: str
-    args: dict[str, str]
+    args: None = None
 
 
 class CreateAgentRequest(BaseModel):
@@ -33,14 +32,7 @@ async def create_agent(request: CreateAgentRequest) -> dict[str, str]:
         The agent_id is the Celery task ID that created the agent.
     """
 
-    tools = list()
-
-    for t in request.tools:
-        try:
-            ct = configure_tool(t.name, t.args)
-            tools.append(ct)
-        except Exception:
-            pass
-
-    task = start_agent.delay(tools=tools, system_prompt=request.system_prompt)
+    task = start_agent.delay(
+        [t.model_dump() for t in request.tools], request.system_prompt
+    )
     return {"agent_id": task.id}

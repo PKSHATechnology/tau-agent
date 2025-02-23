@@ -1,9 +1,10 @@
 import os
-from typing import Callable
 
+import httpx
 from celery import Celery
-
+from typing import Any
 from tau.agent import Agent
+from tau.agent.tools import configure_tool
 
 redis_url = os.environ["REDIS_URL"]
 
@@ -28,17 +29,32 @@ agents = {}
 
 
 @app.task(bind=True)
-def start_agent(self):
-    agent = Agent()
+def start_agent(self, tool_configs: list[dict[str, Any]], system_prompt):
+    tools = list()
+
+    for t in tool_configs:
+        try:
+            tools.append(configure_tool(t["name"], t["args"]))
+        except Exception as e:
+            print(e)
+
+    agent = Agent(tools, system_prompt)
     agents[self.request.id] = agent
     return self.request.id
 
 
 @app.task
-def invoke_agent(task_id, f: Callable[[Agent], Agent]):
-    agent = agents.get(task_id)
-    if task_id in agents:
-        agents[task_id] = f(agent)
+def invoke_agent(agent_id, message: str, callback_url: str):
+    agent = agents.get(agent_id)
+    if agent is not None:
+        reply = agent.send_message(message)
+        print(reply)
+        with httpx.Client() as client:
+            response = client.post(
+                callback_url, json={"agent_id": agent_id, "result": "ok", "content": reply}
+            )
+            response.raise_for_status()
+        agents[agent_id] = agent
     else:
         raise AgentNotFoundError("Agent not found.")
 

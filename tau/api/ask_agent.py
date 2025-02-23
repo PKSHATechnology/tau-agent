@@ -1,8 +1,6 @@
-import httpx
 from fastapi import APIRouter
 from pydantic import BaseModel, HttpUrl
 
-from tau.agent import Agent
 from tau.celery import invoke_agent
 
 router = APIRouter()
@@ -26,16 +24,6 @@ async def ask_agent(agent_id: str, request: AskAgentRequest) -> dict[str, str]:
     Returns:
         dict[str, str]: A dictionary containing the task ID.
     """
-
-    def f(agent: Agent) -> Agent:
-        result = agent.send_message(request.message)
-        with httpx.Client() as client:
-            response = client.post(
-                request.callback_url, json={"agent_id": agent_id, "result": result}
-            )
-            response.raise_for_status()
-        return agent
-
-    invoke_agent.delay(agent_id, f)
+    invoke_agent.delay(agent_id, request.message, str(request.callback_url))
 
     return {"status": "ok"}
