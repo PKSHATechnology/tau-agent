@@ -7,3 +7,4 @@
 - Run formatter and linter after writing the code
 - FastAPI is used to provide API
 - Celery with redis is used to run worker
+- Environment variables are written in .env files and can be loaded by running `load_env_file .env` in shell
