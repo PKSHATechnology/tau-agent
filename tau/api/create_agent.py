@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from tau.worker import create_agent as create_agent_task
+from tau.celery import start_agent
 
 router = APIRouter()
 
@@ -15,5 +15,5 @@ async def create_agent() -> dict[str, str]:
         dict[str, str]: A dictionary containing the agent ID.
         The agent_id is the Celery task ID that created the agent.
     """
-    task = create_agent_task.delay()
+    task = start_agent.delay()
     return {"agent_id": task.id}

@@ -2,6 +2,8 @@
 
 from fastapi import APIRouter
 
+from tau.celery import close_agent
+
 router = APIRouter()
 
 
@@ -15,5 +17,6 @@ async def end_agent(agent_id: str) -> dict[str, str]:
     Returns:
         dict[str, str]: A dictionary containing the status of the operation.
     """
-    # TODO: Implement agent termination
+
+    close_agent.delay(agent_id)
     return {"status": "ok"}
