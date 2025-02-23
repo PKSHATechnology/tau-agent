@@ -11,7 +11,7 @@ COPY tau tau/
 
 # Install dependencies
 RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi
+    && poetry install --no-interaction --no-ansi --without dev
 
 # Start the Celery worker
 CMD ["poetry", "run", "celery", "-A", "tau.worker", "worker", "--loglevel=info", "--uid=nobody", "--gid=nogroup"]
