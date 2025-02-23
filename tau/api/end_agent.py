@@ -7,7 +7,7 @@ from tau.celery import close_agent
 router = APIRouter()
 
 
-@router.put("/v1/agents/{agent_id}/end")
+@router.put("/agents/{agent_id}/end")
 async def end_agent(agent_id: str) -> dict[str, str]:
     """End an agent.
 

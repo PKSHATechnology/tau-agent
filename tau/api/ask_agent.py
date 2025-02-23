@@ -15,7 +15,7 @@ class AskAgentRequest(BaseModel):
     callback_url: HttpUrl
 
 
-@router.post("/v1/agents/{agent_id}/ask")
+@router.post("/agents/{agent_id}/ask")
 async def ask_agent(agent_id: str, request: AskAgentRequest) -> dict[str, str]:
     """Ask a question to an agent.
 

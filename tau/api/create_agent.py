@@ -7,7 +7,7 @@ from tau.celery import start_agent
 router = APIRouter()
 
 
-@router.post("/v1/agents")
+@router.post("/agents")
 async def create_agent() -> dict[str, str]:
     """Create a new agent.
 
