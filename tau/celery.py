@@ -2,9 +2,9 @@ import os
 
 import httpx
 from celery import Celery
-from typing import Any
-from tau.agent import Agent
-from tau.agent.tools import configure_tool
+
+from tau.agent import AgentConfig
+from tau.agent.agent import Agent
 
 redis_url = os.environ["REDIS_URL"]
 
@@ -29,16 +29,8 @@ agents = {}
 
 
 @app.task(bind=True)
-def start_agent(self, tool_configs: list[dict[str, Any]], system_prompt):
-    tools = list()
-
-    for t in tool_configs:
-        try:
-            tools.append(configure_tool(t["name"], t["args"]))
-        except Exception as e:
-            print(e)
-
-    agent = Agent(tools, system_prompt)
+def start_agent(self, config: AgentConfig):
+    agent = Agent(config)
     agents[self.request.id] = agent
     return self.request.id
 
@@ -51,7 +43,8 @@ def invoke_agent(agent_id, message: str, callback_url: str):
         print(reply)
         with httpx.Client() as client:
             response = client.post(
-                callback_url, json={"agent_id": agent_id, "result": "ok", "content": reply}
+                callback_url,
+                json={"agent_id": agent_id, "result": "ok", "content": reply}
             )
             response.raise_for_status()
         agents[agent_id] = agent

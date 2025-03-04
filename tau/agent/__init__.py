@@ -1,28 +1,20 @@
-import os
+from typing import Literal
 
-from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.tools import Tool
-from langchain_openai import AzureChatOpenAI
-from langgraph.prebuilt import create_react_agent
-
-llm = AzureChatOpenAI(
-    azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
-    azure_deployment=os.environ["AZURE_OPENAI_DEPLOYMENT_NAME"],
-    openai_api_version=os.environ["AZURE_OPENAI_API_VERSION"],
-    temperature=0,
-)
+from pydantic import BaseModel
 
 
-class Agent:
-    def __init__(self, tools: list[Tool], system_prompt: str):
-        self._agent = create_react_agent(
-            model=llm,
-            tools=tools,
-        )
-        self._messages = [SystemMessage(content=system_prompt)]
+class AgentTool(BaseModel):
+    tool: str
+    args: dict = None
 
-    def send_message(self, message: str) -> str:
-        self._messages.append(HumanMessage(content=message))
-        result = self._agent.invoke({"messages": self._messages})
-        self._messages = result["messages"]
-        return self._messages[-1].content
+
+SupportedModels = Literal[
+    "gpt-4o", "gpt-4o-mini", "o3-mini", "o1-mini", "o1",
+    "claude-3-7-sonnet", "claude-3-5-sonnet", "claude-3-5-haiku"
+]
+
+
+class AgentConfig(BaseModel):
+    model: SupportedModels
+    prompt: str
+    tools: list[AgentTool]
