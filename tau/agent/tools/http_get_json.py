@@ -3,7 +3,8 @@ from langchain_core.tools import BaseTool, Tool
 
 
 def configure_http_get_json(
-        name: str, description: str, url: str, query_key: str, response_key: str, headers: dict[str, str] = None,
+        name: str, description: str,
+        url: str, query_key: str, response_key: str, headers: dict[str, str] = None,
 ) -> BaseTool:
     def _req(x) -> str:
         data = httpx.get(url, headers=headers, params={query_key: x}, timeout=60).json()

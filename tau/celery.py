@@ -3,8 +3,7 @@ import os
 import httpx
 from celery import Celery
 
-from tau.agent import AgentConfig
-from tau.agent import Agent
+from tau.agent import Agent, AgentConfig
 
 redis_url = os.environ["REDIS_URL"]
 
