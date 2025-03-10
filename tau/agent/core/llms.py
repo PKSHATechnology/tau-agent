@@ -1,7 +1,12 @@
+from typing import Literal
+
 from langchain_anthropic import ChatAnthropic
 from langchain_openai import ChatOpenAI
 
-from tau.agent import SupportedModels
+SupportedModels = Literal[
+    "gpt-4o", "gpt-4o-mini", "o3-mini", "o1-mini", "o1",
+    "claude-3-7-sonnet", "claude-3-5-sonnet", "claude-3-5-haiku"
+]
 
 
 def get_llm(name: SupportedModels):
