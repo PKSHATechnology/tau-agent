@@ -25,5 +25,5 @@ async def create_agent(request: CreateAgentRequest) -> dict[str, str]:
         The agent_id is the Celery task ID that created the agent.
     """
 
-    task = start_agent.delay(request.agent)
+    task = start_agent.delay(request.agent.model_dump())
     return {"agent_id": task.id}

@@ -8,7 +8,7 @@ from tau.agent.core.tools import configure_tool
 
 class AgentToolConfig(BaseModel):
     tool: str
-    args: dict = None
+    args: dict = {}
 
 
 class AgentConfig(BaseModel):

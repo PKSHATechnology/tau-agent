@@ -8,7 +8,7 @@ curl localhost:8000/v1/healthz
 curl localhost:8000/v1/agents \
 -X POST \
 -H "Content-Type: application/json" \
--d '{"system_prompt": "You are an AI Agent. Please respond to questions, utilizing searches, etc.", "tools": [{"name": "tavily"}]}'
+-d '{"agent": {"model": "gpt-4o", "prompt": "You are an AI Agent. Please respond to questions, utilizing searches, etc.", "tools": [{"tool": "tavily"}]}}'
 # => {"agent_id":"6527c885-5e97-4eec-905c-efd19a653a39"}
 
 curl localhost:8000/v1/agents/6527c885-5e97-4eec-905c-efd19a653a39/ask \

@@ -28,8 +28,8 @@ agents = {}
 
 
 @app.task(bind=True)
-def start_agent(self, config: AgentConfig):
-    agent = Agent(config)
+def start_agent(self, config: dict):
+    agent = Agent(AgentConfig(**config))
     agents[self.request.id] = agent
     return self.request.id
 
