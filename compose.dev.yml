@@ -9,26 +9,28 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile.api
+      dockerfile: Dockerfile.dev
     ports:
       - "8000:8000"
     depends_on:
       - redis
     environment:
       - REDIS_URL=redis://redis:6379
+    command:  ["poetry", "run", "uvicorn", "tau:api", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     volumes:
       - .:/app
 
   worker:
     build:
       context: .
-      dockerfile: Dockerfile.worker
+      dockerfile: Dockerfile.dev
     env_file:
       - .env
     depends_on:
       - redis
     environment:
       - REDIS_URL=redis://redis:6379
+    command:  ["watchmedo", "auto-restart", "-d", ".", "-R", "--", "poetry", "run", "celery", "-A", "tau.worker", "worker", "--loglevel=info", "--uid=nobody", "--gid=nogroup"]
     volumes:
       - .:/app
 

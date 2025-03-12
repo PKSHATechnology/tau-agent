@@ -1,14 +1,14 @@
 up:
-	docker compose up -d
+	docker compose -f compose.dev.yml up -d
 
 down:
-	docker compose down
+	docker compose -f compose.dev.yml down
 
 logs:
-	docker compose logs -f
+	docker compose -f compose.dev.yml logs -f
 
 build:
-	docker compose build
+	docker compose -f compose.dev.yml build
 
 format:
 	ruff format .
