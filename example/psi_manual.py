@@ -15,12 +15,14 @@ config: AgentConfig = AgentConfig(
                 "name": "psi-manual",
                 "description": "PSIのマニュアルを検索できるツールです。検索文字列を与えると、マニュアルの情報を返します。",
                 "url": "https://u4555opmn8.execute-api.us-east-1.amazonaws.com/prod/search",
-                "query_key": "query",
-                "response_key": "body",
+                "query_keys": {
+                    "query": "検索文字列",
+                },
+                "result_key": "body",
             },
         ),
         AgentToolConfig(
-            tool="agent",
+            tool="sub_agent",
             args={
                 "name": "cute-ai",
                 "description": "文章が与えられると、語尾に「チャピ」をつけて可愛くすることができます",
