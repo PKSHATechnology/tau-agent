@@ -12,6 +12,4 @@ def configure_tool(name: str, args: dict) -> BaseTool:
         "http_get_json": configure_http_get_json,
     }
 
-    if args is None:
-        args = {}
     return _tools[name](**args)

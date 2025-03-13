@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel, HttpUrl
 
-from tau.celery import invoke_agent
+from tau.worker.celery import invoke_agent
 
 router = APIRouter()
 

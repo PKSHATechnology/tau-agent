@@ -19,16 +19,17 @@ class AgentConfig(BaseModel):
 
 class Agent:
     def __init__(self, config: AgentConfig):
-        self._agent = create_react_agent(
+        self.config = config
+        self._react_agent = create_react_agent(
             model=get_llm(config.model),
             tools=[configure_tool(t.tool, t.args) for t in config.tools],
         )
-        self._messages: list[SystemMessage | HumanMessage] = [
+        self.messages: list[SystemMessage | HumanMessage] = [
             SystemMessage(content=config.prompt)
         ]
 
     def send_message(self, message: str) -> str:
-        self._messages.append(HumanMessage(content=message))
-        result = self._agent.invoke({"messages": self._messages})
-        self._messages = result["messages"]
-        return self._messages[-1].content
+        self.messages.append(HumanMessage(content=message))
+        result = self._react_agent.invoke({"messages": self.messages})
+        self.messages = result["messages"]
+        return self.messages[-1].content

@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from tau.celery import close_agent
+from tau.worker.celery import close_agent
 
 router = APIRouter()
 
