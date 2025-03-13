@@ -29,14 +29,14 @@ app.conf.update(
 redis_client = redis.Redis(host=redis_url, db=0)
 
 
-@app.task(bind=True)
+@app.task(bind=True, event_loop=True)
 async def start_agent(self, config: dict):
     agent = Agent(AgentConfig(**config))
     await _set_agent(self.request.id, agent)
     return self.request.id
 
 
-@app.task
+@app.task(event_loop=True)
 async def invoke_agent(agent_id, message: str, callback_url: str):
     agent = await _get_agent(agent_id)
     if agent is not None:
@@ -53,9 +53,9 @@ async def invoke_agent(agent_id, message: str, callback_url: str):
         raise AgentNotFoundError("Agent not found.")
 
 
-@app.task
-def close_agent(task_id):
-    _del_agent(task_id)
+@app.task(event_loop=True)
+async def close_agent(task_id):
+    await _del_agent(task_id)
 
 def _redis_keys(agent_id):
     return agent_id + "_config", agent_id + "_messages"
