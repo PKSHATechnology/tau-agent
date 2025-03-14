@@ -33,9 +33,10 @@ redis_client = redis.Redis(host=redis_host, port=redis_port, db=0)
 
 @app.task(bind=True)
 def start_agent(self, config: dict):
-    agent = Agent(AgentConfig(**config))
-    _set_agent(self.request.id, agent)
-    return self.request.id
+    agent_id = self.request.id
+    agent = Agent(AgentConfig(**config), agent_id)
+    _set_agent(agent_id, agent)
+    return agent_id
 
 
 @app.task
@@ -46,8 +47,7 @@ def invoke_agent(agent_id, message: str, callback_url: str):
         print(reply)
         with httpx.Client() as client:
             response = client.post(
-                callback_url,
-                json={"agent_id": agent_id, "result": "ok", "content": reply}
+                callback_url, json={"agent_id": agent_id, "result": "ok", "content": reply}
             )
             response.raise_for_status()
         _set_agent(agent_id, agent)
@@ -77,7 +77,7 @@ def _get_agent(agent_id):
     if config_obj is not None and messages_obj is not None:
         config = pickle.loads(config_obj)
         messages = pickle.loads(messages_obj)
-        agent = Agent(config)
+        agent = Agent(config, agent_id)
         agent.messages = messages
         return agent
     else:

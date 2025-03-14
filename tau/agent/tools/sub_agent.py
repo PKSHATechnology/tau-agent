@@ -18,8 +18,8 @@ class SubAgent(Tool):
         return self.agent.send_message(message)
 
 
-def configure_sub_agent(name: str, description: str, agent: dict) -> BaseTool:
-    agent = Agent(AgentConfig(**agent))
+def configure_sub_agent(name: str, description: str, agent: dict, agent_id: str) -> BaseTool:
+    agent = Agent(AgentConfig(**agent), agent_id)
     return Tool(
         name=name,
         func=lambda x: agent.send_message(x),

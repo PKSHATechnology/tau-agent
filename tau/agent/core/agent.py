@@ -18,15 +18,13 @@ class AgentConfig(BaseModel):
 
 
 class Agent:
-    def __init__(self, config: AgentConfig):
+    def __init__(self, config: AgentConfig, agent_id: str):
         self.config = config
         self._react_agent = create_react_agent(
             model=get_llm(config.model),
-            tools=[configure_tool(t.tool, t.args) for t in config.tools],
+            tools=[configure_tool(t.tool, t.args, agent_id) for t in config.tools],
         )
-        self.messages: list[SystemMessage | HumanMessage] = [
-            SystemMessage(content=config.prompt)
-        ]
+        self.messages: list[SystemMessage | HumanMessage] = [SystemMessage(content=config.prompt)]
 
     def send_message(self, message: str) -> str:
         self.messages.append(HumanMessage(content=message))

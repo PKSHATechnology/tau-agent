@@ -7,7 +7,7 @@ load_dotenv()
 config: AgentConfig = AgentConfig(
     model="gpt-4o",
     prompt="あなたは PSI というプロダクトのサポートエージェントです。"
-           "問い合わせに対して、マニュアルを参照しながら適切な情報を提供してください。最後に、文章を可愛くしてください。",
+    "問い合わせに対して、マニュアルを参照しながら適切な情報を提供してください。最後に、文章を可愛くしてください。",
     tools=[
         AgentToolConfig(
             tool="http_get_json",
@@ -29,17 +29,17 @@ config: AgentConfig = AgentConfig(
                 "agent": {
                     "model": "gpt-4o",
                     "prompt": "文章が与えられたら、語尾に「チャビ」を付けて可愛くしてください。"
-                              "可愛くした後のテキストだけを出力してください。",
+                    "可愛くした後のテキストだけを出力してください。",
                     "tools": [],
                 },
             },
         ),
-    ]
+    ],
 )
 
 
 def main():
-    agent = Agent(config)
+    agent = Agent(config, "xxx")
 
     reply = agent.send_message("PSIのラベル管理の手順を教えて")
     print(reply)

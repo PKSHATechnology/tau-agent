@@ -11,14 +11,15 @@ def _get_value_from_json_with_dotted_key(d: dict, key: str) -> str | None:
 
 
 def configure_http_post_json(
-        name: str,
-        description: str,
-        url: str,
-        body_keys: dict[str, str],
-        result_key: str,
+    name: str, description: str, url: str, body_keys: dict[str, str], result_key: str, agent_id: str
 ) -> BaseTool:
     def _req(**kwargs) -> str:
-        data = httpx.post(url, json={k: kwargs[k] for k in body_keys.keys()}, timeout=60).json()
+        data = httpx.post(
+            url,
+            headers={"X-Agent-ID": agent_id},
+            json={k: kwargs[k] for k in body_keys.keys()},
+            timeout=60,
+        ).json()
         return _get_value_from_json_with_dotted_key(data, result_key)
 
     return StructuredTool.from_function(
@@ -36,14 +37,20 @@ def configure_http_post_json(
 
 
 def configure_http_get_json(
-        name: str,
-        description: str,
-        url: str,
-        query_keys: dict[str, str],
-        result_key: str,
+    name: str,
+    description: str,
+    url: str,
+    query_keys: dict[str, str],
+    result_key: str,
+    agent_id: str,
 ) -> BaseTool:
     def _req(**kwargs) -> str:
-        data = httpx.get(url, params={k: kwargs[k] for k in query_keys.keys()}, timeout=60).json()
+        data = httpx.get(
+            url,
+            headers={"X-Agent-ID": agent_id},
+            params={k: kwargs[k] for k in query_keys.keys()},
+            timeout=60,
+        ).json()
         return _get_value_from_json_with_dotted_key(data, result_key)
 
     return StructuredTool.from_function(
