@@ -10,9 +10,9 @@ from mcp.client.stdio import stdio_client
 
 
 class MCPClient:
-    def __init__(self, *, logger=None):
+    def __init__(self, *, config_path="config.json", logger=None):
         self.exit_stack = AsyncExitStack()
-
+        self.config_path = config_path
         self._load_config()
         self.llm = Anthropic(api_key=self.config["llm"]["anthropicApiKey"])
 
@@ -24,7 +24,7 @@ class MCPClient:
         self.logger = logger
 
     def _load_config(self):
-        with open("config.json", "r") as f:
+        with open(self.config_path, "r") as f:
             self.config = json.load(f)
 
     async def connect_mcp_servers(self):
@@ -97,19 +97,26 @@ class MCPClient:
         return "\n".join(final_text)
 
     async def chat_loop(self):
+        self.logger.debug("Starting chat loop")
         while True:
             try:
+                self.logger.debug("Waiting for input...")
                 query = sys.stdin.readline().strip()
+                self.logger.debug(f"Received input: {query}")
 
                 if query == "\\q":
+                    self.logger.debug("Quit command received, exiting...")
                     break
                 if not query:
+                    self.logger.debug("Empty input, continuing...")
                     continue
 
+                self.logger.debug("Processing query...")
                 out = await self.process_query(query)
-                sys.stdout.write("\n" + out + "\n")
+                sys.stdout.write(out + "\n")
+                sys.stdout.flush()
             except Exception as e:
-                self.logger.error(f"Error: {e}")
+                self.logger.error(f"Error in chat loop: {e}")
 
     async def cleanup(self):
         await self.exit_stack.aclose()
