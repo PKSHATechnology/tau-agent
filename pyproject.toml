@@ -8,6 +8,7 @@ authors = ["Ryosuke Hayashi"]
 python = "^3.12"
 httpx = "^0.28.1"
 mcp = "^1.4.1"
+anthropic = "^0.49.0"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.9.7"
