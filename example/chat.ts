@@ -27,7 +27,7 @@ class TauChatClient {
     this.pythonProcess.stdout?.on('data', (data: Buffer) => {
       const output = data.toString().trim();
       if (output) {
-        console.log('\nAssistant: ', output, '\n');
+        console.log('\nAssistant: ', output);
         this.promptUser();
       } else {
         console.log('Empty stdout data received');
@@ -40,9 +40,9 @@ class TauChatClient {
       if (output) {
         // Only log debug/info messages, not errors
         if (!output.includes('ERROR')) {
-          console.log('Debug: ', output, '\n');
+          console.log('Debug: ', output);
         } else {
-          console.error('Error: ', output, '\n');
+          console.error('Error: ', output);
         }
       }
     });
@@ -82,7 +82,7 @@ class TauChatClient {
         if (this.pythonProcess.stdin?.writable) {
           this.pythonProcess.stdin.write(input + '\n', (error) => {
             if (error) {
-              console.error('Error writing to stdin: ', error, '\n');
+              console.error('Error writing to stdin: ', error);
             }
           });
         }
