@@ -1,0 +1,29 @@
+{
+  "llm": {
+    "provider": "anthropic",
+    "model": "claude-3-7-sonnet-20250219",
+    "anthropicApiKey": ""
+  },
+  "mcpServers": {
+    "slack": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-slack"
+      ],
+      "env": {
+        "SLACK_BOT_TOKEN": "",
+        "SLACK_TEAM_ID": ""
+      }
+    },
+    "server-filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/"
+      ],
+      "env": {}
+    }
+  }
+}
