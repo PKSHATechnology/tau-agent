@@ -58,7 +58,9 @@ class MCPClient:
 
     async def process_query(self, query: str) -> str:
         messages = [{"role": "user", "content": query}]
+        final_text = []
 
+        # Initial response
         response = self.llm.messages.create(
             model=self.config["llm"]["model"],
             max_tokens=1000,
@@ -66,57 +68,76 @@ class MCPClient:
             tools=self.available_tools,
         )
 
-        final_text = []
+        # Process the response, which may contain multiple tool calls
+        while True:
+            has_tool_use = False
 
-        for content in response.content:
-            if content.type == "text":
-                final_text.append(content.text)
-            elif content.type == "tool_use":
-                tool_name = content.name
-                tool_args = content.input
+            messages.append({"role": "assistant", "content": response.content})
 
-                result = await self.mcp_sessions[self.tool_session[tool_name]].call_tool(
-                    tool_name, tool_args
-                )
-                self.logger.debug(
-                    f"[Calling tool {tool_name} of {self.tool_session[tool_name]} with args {tool_args}]"
-                )
+            for content in response.content:
+                if content.type == "text":
+                    final_text.append(content.text)
+                elif content.type == "tool_use":
+                    has_tool_use = True
+                    tool_id = content.id
+                    tool_name = content.name
+                    tool_args = content.input
 
-                if hasattr(content, "text") and content.text:
-                    messages.append({"role": "assistant", "content": content.text})
-                messages.append({"role": "user", "content": result.content})
+                    # Call the tool
+                    tool_call_result = await self.mcp_sessions[
+                        self.tool_session[tool_name]
+                    ].call_tool(tool_name, tool_args)
+                    self.logger.debug(
+                        f"[Calling tool {tool_name} of {self.tool_session[tool_name]} with args {tool_args}]"
+                    )
 
-                response = self.llm.messages.create(
-                    model=self.config["llm"]["model"],
-                    max_tokens=1000,
-                    messages=messages,
-                )
+                    # Add the tool result to the conversation
+                    messages.append(
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "tool_result",
+                                    "tool_use_id": tool_id,
+                                    "content": c.text,
+                                }
+                                for c in tool_call_result.content
+                            ],
+                        }
+                    )
 
-                final_text.append(response.content[0].text)
+                    # Get a new response from the LLM with the updated conversation
+                    response = self.llm.messages.create(
+                        model=self.config["llm"]["model"],
+                        max_tokens=1000,
+                        messages=messages,
+                        tools=self.available_tools,
+                    )
+
+            # If no tool use was found, we're done
+            if not has_tool_use:
+                break
 
         return "\n".join(final_text)
 
     async def chat_loop(self):
         self.logger.debug("Starting chat loop")
         while True:
-            try:
-                self.logger.debug("Waiting for input...")
-                query = sys.stdin.readline().strip()
-                self.logger.debug(f"Received input: {query}")
+            self.logger.debug("Waiting for input...")
+            query = sys.stdin.readline().strip()
+            self.logger.debug(f"Received input: {query}")
 
-                if query == "\\q":
-                    self.logger.debug("Quit command received, exiting...")
-                    break
-                if not query:
-                    self.logger.debug("Empty input, continuing...")
-                    continue
+            if query == "\\q":
+                self.logger.debug("Quit command received, exiting...")
+                break
+            if not query:
+                self.logger.debug("Empty input, continuing...")
+                continue
 
-                self.logger.debug("Processing query...")
-                out = await self.process_query(query)
-                sys.stdout.write(out + "\n")
-                sys.stdout.flush()
-            except Exception as e:
-                self.logger.error(f"Error in chat loop: {e}")
+            self.logger.debug("Processing query...")
+            out = await self.process_query(query)
+            sys.stdout.write(out + "\n")
+            sys.stdout.flush()
 
     async def cleanup(self):
         await self.exit_stack.aclose()
