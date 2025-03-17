@@ -1,9 +1,11 @@
 import argparse
 import asyncio
+import json
 import logging
 import sys
 
 from tau.client import MCPClient
+from tau.message_store import create_message_store
 
 logger = logging.getLogger("tau")
 logger.setLevel(logging.DEBUG)
@@ -22,9 +24,14 @@ async def async_main():
     )
     args = parser.parse_args()
 
-    c = MCPClient(config_path=args.config, logger=logger)
+    # Load configuration from file
+    with open(args.config, "r") as f:
+        config = json.load(f)
+
+    message_store = create_message_store(config["message_store"])
+    c = MCPClient(llm_config=config["llm"], message_store=message_store, logger=logger)
     try:
-        await c.connect_mcp_servers()
+        await c.connect_mcp_servers(config["mcp_servers"])
         await c.chat_loop()
     finally:
         await c.cleanup()

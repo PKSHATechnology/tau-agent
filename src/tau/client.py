@@ -1,20 +1,31 @@
-import json
 import logging
 import os
 import sys
+import uuid
 from contextlib import AsyncExitStack
+from typing import Optional
 
 from anthropic import Anthropic
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
+from tau.config import LLMConfig, MCPServerConfig
+from tau.types import SessionID
+from tau.message_store import MessageStore
+
 
 class MCPClient:
-    def __init__(self, *, config_path="config.json", logger=None):
+    def __init__(
+        self,
+        *,
+        llm_config: LLMConfig,
+        message_store: MessageStore,
+        logger: Optional[logging.Logger] = None,
+    ):
         self.exit_stack = AsyncExitStack()
-        self.config_path = config_path
-        self._load_config()
-        self.llm = Anthropic(api_key=self.config["llm"]["anthropicApiKey"])
+        self.llm = Anthropic(api_key=llm_config["anthropic_api_key"])
+        self.model = llm_config["model"]
+        self.message_store = message_store
 
         self.mcp_sessions: dict[str, ClientSession] = {}
         self.available_tools = list()
@@ -23,14 +34,9 @@ class MCPClient:
             logger = logging.getLogger(__name__)
         self.logger = logger
 
-    def _load_config(self):
-        with open(self.config_path, "r") as f:
-            self.config = json.load(f)
-
-    async def connect_mcp_servers(self):
-        mcp_servers = self.config.get("mcpServers", {})
-
-        for name, config in mcp_servers.items():
+    async def connect_mcp_servers(self, mcp_servers: list[MCPServerConfig]):
+        for config in mcp_servers:
+            name = config["name"]
             self.logger.debug(f"Connecting to MCP server: {name}")
 
             env = {**os.environ, **config.get("env", {})}
@@ -56,13 +62,15 @@ class MCPClient:
                 )
                 self.tool_session[tool.name] = session_name
 
-    async def process_query(self, query: str) -> str:
-        messages = [{"role": "user", "content": query}]
-        final_text = []
+    async def invoke_message(self, session_id: SessionID, message: str) -> str:
+        messages = self.message_store.load(session_id)
+
+        messages.append({"role": "user", "content": message})
+        result_text = []
 
         # Initial response
         response = self.llm.messages.create(
-            model=self.config["llm"]["model"],
+            model=self.model,
             max_tokens=1000,
             messages=messages,
             tools=self.available_tools,
@@ -76,7 +84,7 @@ class MCPClient:
 
             for content in response.content:
                 if content.type == "text":
-                    final_text.append(content.text)
+                    result_text.append(content.text)
                 elif content.type == "tool_use":
                     has_tool_use = True
                     tool_id = content.id
@@ -108,7 +116,7 @@ class MCPClient:
 
                     # Get a new response from the LLM with the updated conversation
                     response = self.llm.messages.create(
-                        model=self.config["llm"]["model"],
+                        model=self.model,
                         max_tokens=1000,
                         messages=messages,
                         tools=self.available_tools,
@@ -118,24 +126,34 @@ class MCPClient:
             if not has_tool_use:
                 break
 
-        return "\n".join(final_text)
+        self.message_store.save(session_id, messages)
+
+        return "\n".join(result_text)
 
     async def chat_loop(self):
         self.logger.debug("Starting chat loop")
+        session_id = uuid.uuid4().hex
+        self.logger.debug(f"New Session: {session_id}")
         while True:
             self.logger.debug("Waiting for input...")
             query = sys.stdin.readline().strip()
             self.logger.debug(f"Received input: {query}")
 
-            if query == "\\q":
-                self.logger.debug("Quit command received, exiting...")
-                break
             if not query:
                 self.logger.debug("Empty input, continuing...")
                 continue
 
+            if query == "\\q":
+                self.logger.debug("Quit command received, exiting...")
+                break
+
+            if query == "\\n":
+                session_id = uuid.uuid4().hex
+                self.logger.debug(f"New Session command received, {session_id}")
+                continue
+
             self.logger.debug("Processing query...")
-            out = await self.process_query(query)
+            out = await self.invoke_message(session_id, query)
             sys.stdout.write(out + "\n")
             sys.stdout.flush()
 
