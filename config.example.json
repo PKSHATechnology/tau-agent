@@ -2,10 +2,14 @@
   "llm": {
     "provider": "anthropic",
     "model": "claude-3-7-sonnet-20250219",
-    "anthropicApiKey": ""
+    "anthropic_api_key": ""
   },
-  "mcpServers": {
-    "slack": {
+  "message_store": {
+    "type": "memory"
+  },
+  "mcp_servers": [
+    {
+      "name": "slack",
       "command": "npx",
       "args": [
         "-y",
@@ -16,14 +20,15 @@
         "SLACK_TEAM_ID": ""
       }
     },
-    "server-filesystem": {
+    {
+      "name": "server-filesystem",
       "command": "npx",
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "/"
+        "/Users/ryosuke_hayashi/"
       ],
       "env": {}
     }
-  }
+  ]
 }
