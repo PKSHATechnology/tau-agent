@@ -17,7 +17,7 @@ class TauChatClient {
     });
 
     // Spawn the Python process
-    this.pythonProcess = spawn('python', ['-m', 'tau', '-c', '../config.json'], {
+    this.pythonProcess = spawn('uv', ['run', 'tau', '-c', '../config.json'], {
       cwd: process.cwd(),
       stdio: ['pipe', 'pipe', 'pipe'],
       shell: false,

@@ -1,5 +1,5 @@
-import asyncio
 import argparse
+import asyncio
 import logging
 import sys
 
@@ -12,7 +12,7 @@ stream_handler.setLevel(logging.DEBUG)
 logger.addHandler(stream_handler)
 
 
-async def main():
+async def async_main():
     parser = argparse.ArgumentParser(description="Tau MCP Client")
     parser.add_argument(
         "-c",
@@ -30,5 +30,10 @@ async def main():
         await c.cleanup()
 
 
+def main():
+    """Entry point for the application."""
+    asyncio.run(async_main())
+
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
