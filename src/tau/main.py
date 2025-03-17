@@ -6,6 +6,7 @@ import sys
 
 from tau.client import MCPClient
 from tau.message_store import create_message_store
+from tau.chat import start_chat
 
 logger = logging.getLogger("tau")
 logger.setLevel(logging.DEBUG)
@@ -29,12 +30,12 @@ async def async_main():
         config = json.load(f)
 
     message_store = create_message_store(config["message_store"])
-    c = MCPClient(llm_config=config["llm"], message_store=message_store, logger=logger)
+    client = MCPClient(llm_config=config["llm"], message_store=message_store, logger=logger)
     try:
-        await c.connect_mcp_servers(config["mcp_servers"])
-        await c.chat_loop()
+        await client.connect_mcp_servers(config["mcp_servers"])
+        await start_chat(client)
     finally:
-        await c.cleanup()
+        await client.cleanup()
 
 
 def main():

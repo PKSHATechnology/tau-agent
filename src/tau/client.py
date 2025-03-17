@@ -1,7 +1,5 @@
 import logging
 import os
-import sys
-import uuid
 from contextlib import AsyncExitStack
 from typing import Optional
 
@@ -129,33 +127,6 @@ class MCPClient:
         self.message_store.save(session_id, messages)
 
         return "\n".join(result_text)
-
-    async def chat_loop(self):
-        self.logger.debug("Starting chat loop")
-        session_id = uuid.uuid4().hex
-        self.logger.debug(f"New Session: {session_id}")
-        while True:
-            self.logger.debug("Waiting for input...")
-            query = sys.stdin.readline().strip()
-            self.logger.debug(f"Received input: {query}")
-
-            if not query:
-                self.logger.debug("Empty input, continuing...")
-                continue
-
-            if query == "\\q":
-                self.logger.debug("Quit command received, exiting...")
-                break
-
-            if query == "\\n":
-                session_id = uuid.uuid4().hex
-                self.logger.debug(f"New Session command received, {session_id}")
-                continue
-
-            self.logger.debug("Processing query...")
-            out = await self.invoke_message(session_id, query)
-            sys.stdout.write(out + "\n")
-            sys.stdout.flush()
 
     async def cleanup(self):
         await self.exit_stack.aclose()
