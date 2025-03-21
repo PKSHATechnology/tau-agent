@@ -1,3 +1,4 @@
+import json
 from typing import TypedDict, Literal
 
 
@@ -28,3 +29,10 @@ class Config(TypedDict):
     llm: LLMConfig
     mcp_servers: list[MCPServerConfig]
     message_store: MessageStoreConfig
+
+
+def load_config(path: str) -> Config:
+    with open(path, "r") as f:
+        config = json.load(f)
+
+    return Config(**config)
