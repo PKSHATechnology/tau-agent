@@ -1,6 +1,7 @@
 import logging
 import os
 from contextlib import AsyncExitStack
+from datetime import timedelta
 from typing import Optional
 
 from anthropic import Anthropic
@@ -43,7 +44,9 @@ class MCPClient:
             )
 
             stdio_transport = await self.exit_stack.enter_async_context(stdio_client(server_params))
-            session = await self.exit_stack.enter_async_context(ClientSession(*stdio_transport))
+            session = await self.exit_stack.enter_async_context(
+                ClientSession(*stdio_transport, read_timeout_seconds=timedelta(seconds=10))
+            )
             await session.initialize()
 
             self.mcp_sessions[name] = session
@@ -92,7 +95,7 @@ class MCPClient:
 
                     # Call the tool
                     self.logger.debug(
-                        f"[Calling tool {tool_name} of {self.tool_session[tool_name]} with args {tool_args}]"
+                        f"Calling tool {tool_name} of {self.tool_session[tool_name]} with args {tool_args}"
                     )
                     tool_call_result = await self.mcp_sessions[
                         self.tool_session[tool_name]
