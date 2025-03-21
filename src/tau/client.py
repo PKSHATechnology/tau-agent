@@ -15,11 +15,11 @@ from tau.types import SessionID
 
 class MCPClient:
     def __init__(
-            self,
-            *,
-            llm_config: LLMConfig,
-            message_store: MessageStore,
-            logger: Optional[logging.Logger] = None,
+        self,
+        *,
+        llm_config: LLMConfig,
+        message_store: MessageStore,
+        logger: Optional[logging.Logger] = None,
     ):
         self.exit_stack = AsyncExitStack()
         self.llm = Anthropic(api_key=llm_config["anthropic_api_key"])
