@@ -8,17 +8,17 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 from tau.config import LLMConfig, MCPServerConfig
-from tau.types import SessionID
 from tau.message_store import MessageStore
+from tau.types import SessionID
 
 
 class MCPClient:
     def __init__(
-        self,
-        *,
-        llm_config: LLMConfig,
-        message_store: MessageStore,
-        logger: Optional[logging.Logger] = None,
+            self,
+            *,
+            llm_config: LLMConfig,
+            message_store: MessageStore,
+            logger: Optional[logging.Logger] = None,
     ):
         self.exit_stack = AsyncExitStack()
         self.llm = Anthropic(api_key=llm_config["anthropic_api_key"])
@@ -73,6 +73,7 @@ class MCPClient:
             messages=messages,
             tools=self.available_tools,
         )
+        self.logger.debug(f"Initial response: {response.content}")
 
         # Process the response, which may contain multiple tool calls
         while True:
@@ -90,12 +91,12 @@ class MCPClient:
                     tool_args = content.input
 
                     # Call the tool
-                    tool_call_result = await self.mcp_sessions[
-                        self.tool_session[tool_name]
-                    ].call_tool(tool_name, tool_args)
                     self.logger.debug(
                         f"[Calling tool {tool_name} of {self.tool_session[tool_name]} with args {tool_args}]"
                     )
+                    tool_call_result = await self.mcp_sessions[
+                        self.tool_session[tool_name]
+                    ].call_tool(tool_name, tool_args)
 
                     # Add the tool result to the conversation
                     messages.append(
