@@ -97,24 +97,40 @@ class MCPClient:
                     self.logger.debug(
                         f"Calling tool {tool_name} of {self.tool_session[tool_name]} with args {tool_args}"
                     )
-                    tool_call_result = await self.mcp_sessions[
-                        self.tool_session[tool_name]
-                    ].call_tool(tool_name, tool_args)
 
-                    # Add the tool result to the conversation
-                    messages.append(
-                        {
-                            "role": "user",
-                            "content": [
-                                {
-                                    "type": "tool_result",
-                                    "tool_use_id": tool_id,
-                                    "content": c.text,
-                                }
-                                for c in tool_call_result.content
-                            ],
-                        }
-                    )
+                    try:
+                        tool_call_result = await self.mcp_sessions[
+                            self.tool_session[tool_name]
+                        ].call_tool(tool_name, tool_args)
+
+                        # Add the tool result to the conversation
+                        messages.append(
+                            {
+                                "role": "user",
+                                "content": [
+                                    {
+                                        "type": "tool_result",
+                                        "tool_use_id": tool_id,
+                                        "content": c.text,
+                                    }
+                                    for c in tool_call_result.content
+                                ],
+                            }
+                        )
+                    except Exception as e:
+                        self.logger.error(f"Error calling tool {tool_name}: {e}")
+                        messages.append(
+                            {
+                                "role": "user",
+                                "content": [
+                                    {
+                                        "type": "tool_result",
+                                        "tool_use_id": tool_id,
+                                        "content": f"Error calling tool: {e}",
+                                    }
+                                ],
+                            }
+                        )
 
                     # Get a new response from the LLM with the updated conversation
                     response = self.llm.messages.create(
