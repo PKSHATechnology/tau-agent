@@ -1,19 +1,55 @@
 # tau-agent
 
-## test
-```sh
-curl localhost:8000/v1/healthz
-# => {"status":"ok"}
+A Python-based agent for MCP (Model Context Protocol) clients.
 
-curl localhost:8000/v1/agents \
--X POST \
--H "Content-Type: application/json" \
--d '{"agent": {"model": "gpt-4o", "prompt": "You are an AI Agent. Please respond to questions, utilizing searches, etc.", "tools": [{"tool": "tavily"}]}}'
-# => {"agent_id":"6527c885-5e97-4eec-905c-efd19a653a39"}
+## Setup
 
-curl localhost:8000/v1/agents/6527c885-5e97-4eec-905c-efd19a653a39/ask \
--X POST \
--H "Content-Type: application/json" \
--d '{"message": "How is the weather today in Tokyo?", "callback_url": "https://example.com"}'
-# => {"agent_id":"6527c885-5e97-4eec-905c-efd19a653a39", "result": "ok", "content": "The current weather in Tokyo is partly cloudy with a temperature of 8.3°C (46.9°F). The wind is blowing from the southeast at 13.0 kph (8.1 mph), and the humidity is at 21%. The visibility is 10 kilometers (6 miles), and there is a slight chance of precipitation with 0.01 mm recorded. The weather feels like 6.1°C (43.0°F) due to the wind chill."}
+This project uses [uv](https://github.com/astral-sh/uv) for package management.
+
+### Installation
+
+1. Install dependencies:
+
+```bash
+# Install for development
+make dev-install
+
+# Or install for production
+make install
+```
+
+2. Create a configuration file:
+
+```bash
+cp config.example.json config.json
+```
+
+3. Edit the configuration file to add your API keys and MCP server settings.
+
+## Usage
+
+Run the agent:
+
+```bash
+python -m tau
+```
+
+Or with a custom config file:
+
+```bash
+python -m tau -c path/to/config.json
+```
+
+## Development
+
+Format and lint the code:
+
+```bash
+make format
+```
+
+Clean build artifacts:
+
+```bash
+make clean
 ```

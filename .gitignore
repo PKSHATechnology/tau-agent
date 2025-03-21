@@ -22,8 +22,8 @@ wheels/
 MANIFEST
 .ruff_cache
 
-# Poetry
-poetry.lock
+# uv
+uv.lock
 
 # Virtual Environments
 .env
@@ -60,3 +60,5 @@ htmlcov/
 
 # others
 tmp
+
+config.json
