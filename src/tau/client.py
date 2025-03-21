@@ -44,7 +44,7 @@ class MCPClient:
 
             stdio_transport = await self.exit_stack.enter_async_context(stdio_client(server_params))
             session = await self.exit_stack.enter_async_context(
-                ClientSession(*stdio_transport, read_timeout_seconds=timedelta(seconds=10))
+                ClientSession(*stdio_transport, read_timeout_seconds=timedelta(seconds=30))
             )
             await session.initialize()
 
