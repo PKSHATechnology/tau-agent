@@ -4,11 +4,11 @@ from contextlib import AsyncExitStack
 from datetime import timedelta
 from typing import Optional
 
-from anthropic import Anthropic
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
-from tau.config import LLMConfig, MCPServerConfig
+from tau.config import MCPServerConfig
+from tau.llm import LLM
 from tau.message_store import MessageStore
 from tau.types import SessionID
 
@@ -17,13 +17,12 @@ class MCPClient:
     def __init__(
         self,
         *,
-        llm_config: LLMConfig,
+        llm: LLM,
         message_store: MessageStore,
         logger: Optional[logging.Logger] = None,
     ):
         self.exit_stack = AsyncExitStack()
-        self.llm = Anthropic(api_key=llm_config["anthropic_api_key"])
-        self.model = llm_config["model"]
+        self.llm = llm
         self.message_store = message_store
 
         self.mcp_sessions: dict[str, ClientSession] = {}
@@ -70,9 +69,7 @@ class MCPClient:
         result_text = []
 
         # Initial response
-        response = self.llm.messages.create(
-            model=self.model,
-            max_tokens=1000,
+        response = self.llm.invoke(
             messages=messages,
             tools=self.available_tools,
         )
@@ -133,9 +130,7 @@ class MCPClient:
                         )
 
                     # Get a new response from the LLM with the updated conversation
-                    response = self.llm.messages.create(
-                        model=self.model,
-                        max_tokens=1000,
+                    response = self.llm.invoke(
                         messages=messages,
                         tools=self.available_tools,
                     )

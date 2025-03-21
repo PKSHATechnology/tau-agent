@@ -8,7 +8,17 @@ class AnthropicLLMConfig(TypedDict):
     anthropic_api_key: str
 
 
-type LLMConfig = AnthropicLLMConfig
+class AnthropicBedrockLLMConfig(TypedDict):
+    provider: Literal["anthropic_bedrock"]
+    model: str
+    aws_secret_key: str | None
+    aws_access_key: str | None
+    aws_region: str | None
+    aws_profile: str | None
+    aws_session_token: str | None
+
+
+type LLMConfig = AnthropicLLMConfig | AnthropicBedrockLLMConfig
 
 
 class MCPServerConfig(TypedDict):

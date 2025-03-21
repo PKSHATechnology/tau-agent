@@ -6,6 +6,7 @@ import uuid
 
 from tau.client import MCPClient
 from tau.config import load_config
+from tau.llm import create_llm
 from tau.logger import logger
 from tau.message_store import create_message_store
 
@@ -75,8 +76,9 @@ async def _main(handler):
 
     config = load_config(args.config)
 
+    llm = create_llm(config["llm"])
     message_store = create_message_store(config["message_store"])
-    client = MCPClient(llm_config=config["llm"], message_store=message_store, logger=logger)
+    client = MCPClient(llm=llm, message_store=message_store, logger=logger)
     try:
         await client.connect_mcp_servers(config["mcp_servers"])
         await handler(client)
