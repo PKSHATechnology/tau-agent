@@ -34,12 +34,11 @@ class MCPClient:
 
     async def connect_mcp_servers(self, mcp_servers: list[MCPServerConfig]):
         for config in mcp_servers:
-            name = config["name"]
+            name = config.name
             self.logger.debug(f"Connecting to MCP server: {name}")
 
-            env = {**os.environ, **config.get("env", {})}
             server_params = StdioServerParameters(
-                command=config["command"], args=config.get("args", []), env=env
+                command=config.command, args=config.args, env={**os.environ, **config.env}
             )
 
             stdio_transport = await self.exit_stack.enter_async_context(stdio_client(server_params))

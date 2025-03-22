@@ -76,11 +76,11 @@ async def _main(handler):
 
     config = load_config(args.config)
 
-    llm = create_llm(config["llm"])
-    message_store = create_message_store(config["message_store"])
+    llm = create_llm(config.llm)
+    message_store = create_message_store(config.message_store)
     client = MCPClient(llm=llm, message_store=message_store, logger=logger)
     try:
-        await client.connect_mcp_servers(config["mcp_servers"])
+        await client.connect_mcp_servers(config.mcp_servers)
         await handler(client)
     finally:
         await client.cleanup()

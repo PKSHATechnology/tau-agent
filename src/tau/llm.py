@@ -13,8 +13,8 @@ class LLM(abc.ABC):
 
 class AnthropicLLM(LLM):
     def __init__(self, config: AnthropicLLMConfig):
-        self.model = config["model"]
-        self.llm = Anthropic(api_key=config["anthropic_api_key"])
+        self.model = config.model
+        self.llm = Anthropic(api_key=config.anthropic_api_key)
 
     def invoke(self, messages: list[dict], tools: list) -> Message:
         return self.llm.messages.create(
@@ -27,13 +27,13 @@ class AnthropicLLM(LLM):
 
 class AnthropicBedrockLLM(LLM):
     def __init__(self, config: AnthropicBedrockLLMConfig):
-        self.model = config["model"]
+        self.model = config.model
         self.llm = AnthropicBedrock(
-            aws_secret_key=config.get("aws_secret_key"),
-            aws_access_key=config.get("aws_access_key"),
-            aws_region=config.get("aws_region"),
-            aws_profile=config.get("aws_profile"),
-            aws_session_token=config.get("aws_session_token"),
+            aws_secret_key=config.aws_secret_key,
+            aws_access_key=config.aws_access_key,
+            aws_region=config.aws_region,
+            aws_profile=config.aws_profile,
+            aws_session_token=config.aws_session_token,
         )
 
     def invoke(self, messages: list[dict], tools: list) -> Message:
@@ -46,9 +46,9 @@ class AnthropicBedrockLLM(LLM):
 
 
 def create_llm(config: LLMConfig) -> LLM:
-    if config["provider"] == "anthropic":
+    if config.provider == "anthropic":
         return AnthropicLLM(config)
-    elif config["provider"] == "anthropic_bedrock":
+    elif config.provider == "anthropic_bedrock":
         return AnthropicBedrockLLM(config)
     else:
-        raise ValueError(f"Unknown LLM provider: {config['provider']}")
+        raise ValueError(f"Unknown LLM provider: {config.provider}")

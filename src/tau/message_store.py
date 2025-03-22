@@ -28,7 +28,7 @@ class MemoryMessageStore(MessageStore):
 
 
 def create_message_store(config: MessageStoreConfig) -> MessageStore:
-    if config["type"] == "memory":
+    if config.type == "memory":
         return MemoryMessageStore()
     else:
-        raise ValueError(f"Unknown message store type: {config['type']}")
+        raise ValueError(f"Unknown message store type: {config.type}")

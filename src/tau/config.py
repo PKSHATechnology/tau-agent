@@ -1,41 +1,42 @@
 import json
-from typing import TypedDict, Literal
+from typing import Literal, Union
+from pydantic import BaseModel
 
 
-class AnthropicLLMConfig(TypedDict):
+class AnthropicLLMConfig(BaseModel):
     provider: Literal["anthropic"]
     model: str
     anthropic_api_key: str
 
 
-class AnthropicBedrockLLMConfig(TypedDict):
+class AnthropicBedrockLLMConfig(BaseModel):
     provider: Literal["anthropic_bedrock"]
     model: str
-    aws_secret_key: str | None
-    aws_access_key: str | None
-    aws_region: str | None
-    aws_profile: str | None
-    aws_session_token: str | None
+    aws_secret_key: str | None = None
+    aws_access_key: str | None = None
+    aws_region: str | None = None
+    aws_profile: str | None = None
+    aws_session_token: str | None = None
 
 
-type LLMConfig = AnthropicLLMConfig | AnthropicBedrockLLMConfig
+LLMConfig = Union[AnthropicLLMConfig, AnthropicBedrockLLMConfig]
 
 
-class MCPServerConfig(TypedDict):
+class MCPServerConfig(BaseModel):
     name: str
     command: str
-    args: list[str]
-    env: dict[str, str]
+    args: list[str] = []
+    env: dict[str, str] = {}
 
 
-class MemoryMessageStoreConfig(TypedDict):
+class MemoryMessageStoreConfig(BaseModel):
     type: Literal["memory"]
 
 
-type MessageStoreConfig = MemoryMessageStoreConfig
+MessageStoreConfig = MemoryMessageStoreConfig
 
 
-class Config(TypedDict):
+class Config(BaseModel):
     llm: LLMConfig
     mcp_servers: list[MCPServerConfig]
     message_store: MessageStoreConfig
@@ -43,6 +44,6 @@ class Config(TypedDict):
 
 def load_config(path: str) -> Config:
     with open(path, "r") as f:
-        config = json.load(f)
+        config_data = json.load(f)
 
-    return Config(**config)
+    return Config.model_validate(config_data)
