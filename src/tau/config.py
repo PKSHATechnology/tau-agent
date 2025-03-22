@@ -4,13 +4,13 @@ from pydantic import BaseModel
 
 
 class AnthropicLLMConfig(BaseModel):
-    provider: Literal["anthropic"]
+    provider: Literal["anthropic"] = "anthropic"
     model: str
     anthropic_api_key: str
 
 
 class AnthropicBedrockLLMConfig(BaseModel):
-    provider: Literal["anthropic_bedrock"]
+    provider: Literal["anthropic_bedrock"] = "anthropic_bedrock"
     model: str
     aws_secret_key: str | None = None
     aws_access_key: str | None = None
@@ -30,11 +30,11 @@ class MCPServerConfig(BaseModel):
 
 
 class MemoryMessageStoreConfig(BaseModel):
-    type: Literal["memory"]
+    type: Literal["memory"] = "memory"
 
 
 class SQLite3MessageStoreConfig(BaseModel):
-    type: Literal["sqlite3"]
+    type: Literal["sqlite3"] = "sqlite3"
     db_path: str = "messages.db"
 
 
