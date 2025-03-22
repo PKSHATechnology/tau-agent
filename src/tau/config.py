@@ -33,7 +33,12 @@ class MemoryMessageStoreConfig(BaseModel):
     type: Literal["memory"]
 
 
-MessageStoreConfig = MemoryMessageStoreConfig
+class SQLite3MessageStoreConfig(BaseModel):
+    type: Literal["sqlite3"]
+    db_path: str = "messages.db"
+
+
+MessageStoreConfig = Union[MemoryMessageStoreConfig, SQLite3MessageStoreConfig]
 
 
 class Config(BaseModel):
