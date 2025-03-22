@@ -142,5 +142,8 @@ class MCPClient:
 
         return "\n".join(result_text)
 
+    def get_messages(self, session_id: SessionID):
+        return self.message_store.load(session_id)
+
     async def cleanup(self):
         await self.exit_stack.aclose()
